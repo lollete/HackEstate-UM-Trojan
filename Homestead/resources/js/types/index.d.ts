@@ -63,6 +63,13 @@ export interface Property {
     image: string; // URL to the property image
     forSale: boolean;
     forRent: boolean;
-    // You might add a createdAt field for 'Latest' sorting
-    // createdAt?: string; // Example: ISO date string
+    details?: {
+        bedroomsAndBathrooms?: {
+            bedrooms: number;
+            bathrooms: number;
+            fullBathrooms?: number;
+        };
+        features?: string[]; // e.g., ["Ceiling Fan(s)", "Flooring: Luxury Vinyl, Tile", "Has basement: No"]
+        // Add other details as needed
+    };
 }

@@ -17,6 +17,20 @@ const properties: Property[] = [
         image: 'https://picsum.photos/id/180/200/300',
         forSale: true,
         forRent: false,
+        details: {
+            bedroomsAndBathrooms: {
+                bedrooms: 3,
+                bathrooms: 2,
+                fullBathrooms: 2,
+            },
+            features: [
+                "Ceiling Fan(s)",
+                "Flooring: Luxury Vinyl, Tile",
+                "Has basement: No",
+                "Spacious backyard",
+                "Modern kitchen appliances"
+            ]
+        }
         // createdAt: '2025-07-01T10:00:00Z', // Example for 'Latest' sort
     },
     {
@@ -34,6 +48,20 @@ const properties: Property[] = [
         image: 'https://i.pinimg.com/1200x/f4/5e/66/f45e66a57195833aff26b8614b5c056d.jpg',
         forSale: true,
         forRent: true,
+        details: {
+            bedroomsAndBathrooms: {
+                bedrooms: 3,
+                bathrooms: 2,
+                fullBathrooms: 2,
+            },
+            features: [
+                "Ceiling Fan(s)",
+                "Flooring: Luxury Vinyl, Tile",
+                "Has basement: No",
+                "Spacious backyard",
+                "Modern kitchen appliances"
+            ]
+        }
         // createdAt: '2025-07-05T12:30:00Z',
     },
     {
@@ -51,6 +79,20 @@ const properties: Property[] = [
         image: 'https://i.pinimg.com/1200x/f4/5e/66/f45e66a57195833aff26b8614b5c056d.jpg',
         forSale: false,
         forRent: true,
+        details: {
+            bedroomsAndBathrooms: {
+                bedrooms: 3,
+                bathrooms: 2,
+                fullBathrooms: 2,
+            },
+            features: [
+                "Ceiling Fan(s)",
+                "Flooring: Luxury Vinyl, Tile",
+                "Has basement: No",
+                "Spacious backyard",
+                "Modern kitchen appliances"
+            ]
+        }
         // createdAt: '2025-06-20T08:00:00Z',
     },
 ];

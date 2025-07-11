@@ -26,6 +26,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
             <img src={image} alt={name} className="w-full h-60 object-cover" />
+            <input type="hidden" value={id} />
             <div className="p-3 flex-grow">
                 <h3 className="text-l mb-1">{name}</h3>
                 <div className="flex items-center space-x-2 text-sm mb-2">
@@ -72,7 +73,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
                         <p className="text-xs text-gray-500">Agent</p>
                     </div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-800 font-medium text-sm">View</button>
+                <a href={`/Property/${id}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">View</a>
             </div>
         </div>
     );
