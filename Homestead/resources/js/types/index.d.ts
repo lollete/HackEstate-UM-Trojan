@@ -41,3 +41,28 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+
+
+// 
+
+export interface Agent {
+    name: string;
+    avatar: string; // URL to the agent's avatar
+}
+
+export interface Property {
+    id: string;
+    name: string;
+    location: string;
+    size: number; // in square feet
+    bedrooms: number;
+    bathrooms: number;
+    price: number;
+    agent: Agent;
+    image: string; // URL to the property image
+    forSale: boolean;
+    forRent: boolean;
+    // You might add a createdAt field for 'Latest' sorting
+    // createdAt?: string; // Example: ISO date string
+}
