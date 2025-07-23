@@ -9,7 +9,7 @@ Route::get('/', function () {
 })->name('home');
 
 Route::get('/Property/{id}', [ClientController::class, 'ListingView'])->name('properties.listingView');
-
+Route::get('/Bookmark/', [ClientController::class, 'BookmarkView'])->name('properties.BookmarkView');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {

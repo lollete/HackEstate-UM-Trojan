@@ -1,10 +1,13 @@
 // js/data/property.ts
-import { Property } from '@/types'; // Adjust path if your types folder is elsewhere
+import { Property, Bookmark } from '@/types'; // Adjust path if your types folder is elsewhere
 
+
+
+// tagged users of true?false = booked, toured, rented, lived
 const properties: Property[] = [
     {
         id: '1',
-        name: 'Family Home',
+        name: 'Hehehe Home',
         location: 'Ma-a, Davao City, 8000',
         size: 100,
         bedrooms: 3,
@@ -95,6 +98,13 @@ const properties: Property[] = [
         }
         // createdAt: '2025-06-20T08:00:00Z',
     },
+];
+
+
+const bookmarks: Bookmark[] = [
+    { userId: '1', propertyId: '1' }, // User 1 bookmarked property 1
+    { userId: '1', propertyId: '3' }, // User 1 bookmarked property 3
+    { userId: '2', propertyId: '2' }, // Another user bookmarked property 2
 ];
 
 export default properties;

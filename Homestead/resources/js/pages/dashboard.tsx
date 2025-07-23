@@ -3,6 +3,9 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import PropertyList from '@/components/PropertyListings';
+import TextTyping from '@/components/type-writer';
+import Luma from '@/components/api/LumaEvents';
+import Bookmark from '@/pages/bookmark/bookmarkProperty';
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -15,7 +18,6 @@ export default function Dashboard() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
             <div className="flex h-full flex-col ">
-                
                 <div className="min-h-screen">
                     <PropertyList />
                 </div>

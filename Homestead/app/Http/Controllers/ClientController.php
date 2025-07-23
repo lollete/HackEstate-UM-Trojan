@@ -11,4 +11,8 @@ class ClientController extends Controller
     {
         return Inertia::render('properties/listingView');
     }
+    public function BookmarkView()
+    {
+        return Inertia::render('bookmark/bookmarkProperty');
+    }
 }

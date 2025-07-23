@@ -5,6 +5,7 @@ import { type BreadcrumbItem, type Property } from '@/types'; // Import Property
 import propertiesData from '@/data/property'; // Adjust path as necessary
 import { Ruler, BedDouble, Bath, MapPin, Heart, Bookmark, Share2, Calendar, Star, User, Eye } from 'lucide-react'; // Import necessary icons
 
+import RequestTourModal from '@/components/modal/RequestTour';
 const ListingView: React.FC = () => {
     const [property, setProperty] = useState<Property | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -211,9 +212,8 @@ const ListingView: React.FC = () => {
                                         <button className="px-4 py-1 outline outline-green-700 rounded-sm hover:bg-green-100 text-green-700 transition duration-300 shadow-md text-sm">
                                             Contact {property.agent.name.split(' ')[0]}
                                         </button>
-                                        <button className="px-4 py-1 bg-green-700 text-white rounded-sm hover:bg-green-700 transition duration-300 shadow-md text-sm">
-                                            Request a tour
-                                        </button>
+                                        <RequestTourModal/>
+                                   
                                     </div>
                                 </div>
                             </div>

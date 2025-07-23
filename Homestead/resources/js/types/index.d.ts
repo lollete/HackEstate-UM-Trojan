@@ -73,3 +73,8 @@ export interface Property {
         // Add other details as needed
     };
 }
+
+export interface Bookmark {
+    userId: string;
+    propertyId: string;
+}
