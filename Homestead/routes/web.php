@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
@@ -14,8 +15,11 @@ Route::get('/Bookmark/', [ClientController::class, 'BookmarkView'])->name('prope
 Route::get('/Event/', [EventController::class, 'EventView'])->name('event.EventView');
 Route::get('/Event/{id}', [EventController::class, 'EventDetails'])->name('event.EventDetails');
 
+
+Route::get('/Chat',[ChatController::class,'Chatlist'])->name('agent.viewChat');
+
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', function () {
+    Route::get('dashboard', action: function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 });

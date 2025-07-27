@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bot, User, Send, X, MessageSquareText } from 'lucide-react'; // Importing necessary icons
+import { Bot, User, Send, X } from 'lucide-react';
 
-// Define the Message interface for type safety
 interface Message {
     id: string;
     sender: 'user' | 'bot';
@@ -9,87 +8,55 @@ interface Message {
 }
 
 const App: React.FC = () => {
-    const [isOpen, setIsOpen] = useState(false); // State to control modal visibility
+    const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState<Message[]>([
-        { id: '1', sender: 'bot', text: 'Hello 👋 Please describe your issue so I can help you.' },
-    ]); // State to store chat messages
-    const [inputValue, setInputValue] = useState(''); // State to store the current input value
-    const [isThinking, setIsThinking] = useState(false); // New state to indicate bot is thinking
-    const messagesEndRef = useRef<HTMLDivElement>(null); // Ref for auto-scrolling to the latest message
+        {
+            id: '1',
+            sender: 'bot',
+            text: 'Hello 👋 Please describe your issue so I can help you.',
+        },
+    ]);
+    const [inputValue, setInputValue] = useState('');
+    const [isThinking, setIsThinking] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    // Function to scroll to the bottom of the chat messages
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Effect to scroll to bottom whenever messages update
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
 
-    // Function to handle sending a message
     const handleSendMessage = async () => {
-        if (inputValue.trim() === '') return; // Prevent sending empty messages
+        if (inputValue.trim() === '') return;
 
         const newUserMessage: Message = {
-            id: Date.now().toString(), // Unique ID for the message
+            id: Date.now().toString(),
             sender: 'user',
             text: inputValue.trim(),
         };
-        setMessages((prevMessages) => [...prevMessages, newUserMessage]); // Add user message to chat
-
-        setInputValue(''); // Clear input field
-        setIsThinking(true); // Set thinking state to true
+        setMessages((prev) => [...prev, newUserMessage]);
+        setInputValue('');
+        setIsThinking(true);
 
         try {
-            const botResponseText = await generateBotResponse(newUserMessage.text);
+            const botResponse = await generateBotResponse(newUserMessage.text);
             const newBotMessage: Message = {
                 id: Date.now().toString() + '-bot',
                 sender: 'bot',
-                text: botResponseText,
+                text: botResponse,
             };
-            setMessages((prevMessages) => [...prevMessages, newBotMessage]); // Add bot message to chat
+            setMessages((prev) => [...prev, newBotMessage]);
         } catch (error) {
-            console.error("Error generating bot response:", error);
             const errorMessage: Message = {
                 id: Date.now().toString() + '-error',
                 sender: 'bot',
                 text: "Oops! Something went wrong. Please try again.",
             };
-            setMessages((prevMessages) => [...prevMessages, errorMessage]);
+            setMessages((prev) => [...prev, errorMessage]);
         } finally {
-            setIsThinking(false);         
-        }
-    };
-
-    // Function to generate bot response using Gemini API
-    const generateBotResponse = async (userMessage: string): Promise<string> => {
-        let chatHistory = [];
-        chatHistory.push({ role: "user", parts: [{ text: userMessage }] });
-
-        const payload = { contents: chatHistory };
-        const apiKey = ""; // API key will be provided by the runtime
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const result = await response.json();
-
-            if (result.candidates && result.candidates.length > 0 &&
-                result.candidates[0].content && result.candidates[0].content.parts &&
-                result.candidates[0].content.parts.length > 0) {
-                return result.candidates[0].content.parts[0].text;
-            } else {
-                console.error("Unexpected API response structure:", result);
-                return "I'm sorry, I couldn't generate a response at this time.";
-            }
-        } catch (error) {
-            console.error("Error calling Gemini API:", error);
-            throw new Error("API call failed");
+            setIsThinking(false);
         }
     };
 
@@ -97,29 +64,63 @@ const App: React.FC = () => {
         setInputValue(e.target.value);
     };
 
-    // Function to handle key press (for sending message on Enter)
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();             handleSendMessage();
+            e.preventDefault();
+            handleSendMessage();
+        }
+    };
+
+    // 🔑 Gemini API Integration
+    const generateBotResponse = async (userMessage: string): Promise<string> => {
+        const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        const payload = {
+            contents: [
+                {
+                    role: 'user',
+                    parts: [{ text: userMessage }],
+                },
+            ],
+        };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+
+            const result = await response.json();
+            const text = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+            if (text) return text;
+
+            console.error("Unexpected response structure:", result);
+            return "I'm sorry, I couldn't generate a response at this time.";
+        } catch (error) {
+            console.error("Gemini API call failed:", error);
+            throw new Error("API call failed");
         }
     };
 
     return (
         <div className="font-sans antialiased bg-gray-100 flex items-center justify-center min-h-screen">
-            {/* Floating Chatbot Button */}
+            {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(true)}
                 className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 z-50"
                 aria-label="Open Chatbot"
             >
-                <Bot size={32} /> {/* Avatar Robot Icon */}
+                <Bot size={32} />
             </button>
 
-            {/* Chatbot Modal */}
+            {/* Chat Modal */}
             {isOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col h-[90vh] max-h-[600px] overflow-hidden transform transition-all duration-300 scale-100 opacity-100">
-                        {/* Modal Header */}
+                        {/* Header */}
                         <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200 rounded-t-2xl">
                             <div className="flex items-center space-x-3">
                                 <div className="bg-green-100 p-2 rounded-full">
@@ -136,13 +137,12 @@ const App: React.FC = () => {
                             </button>
                         </div>
 
-                        {/* Chat Messages Area */}
+                        {/* Messages */}
                         <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50">
                             {messages.map((message) => (
                                 <div
                                     key={message.id}
-                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'
-                                        }`}
+                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     <div
                                         className={`flex items-start max-w-[80%] p-3 rounded-xl shadow-sm ${message.sender === 'user'
@@ -168,7 +168,7 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                            <div ref={messagesEndRef} /> 
+                            <div ref={messagesEndRef} />
                         </div>
 
                         {/* Input Area */}
@@ -181,19 +181,21 @@ const App: React.FC = () => {
                                     onChange={handleInputChange}
                                     onKeyPress={handleKeyPress}
                                     rows={1}
-                                    style={{ minHeight: '48px', maxHeight: '120px' }} 
-                                    disabled={isThinking} 
+                                    style={{ minHeight: '48px', maxHeight: '120px' }}
+                                    disabled={isThinking}
                                 />
                                 <button
                                     onClick={handleSendMessage}
                                     className="absolute bottom-3 right-3 bg-green-500 text-white p-2 rounded-full shadow-md hover:bg-green-600 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-300"
                                     aria-label="Send Message"
-                                    disabled={isThinking || inputValue.trim() === ''} 
+                                    disabled={isThinking || inputValue.trim() === ''}
                                 >
                                     <Send size={20} />
                                 </button>
                             </div>
-                            <p className="text-xs text-gray-500 mt-2 text-center">Dodong may produce inaccurate responses</p>
+                            <p className="text-xs text-gray-500 mt-2 text-center">
+                                Dodong may produce inaccurate responses
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -109,3 +109,30 @@ export interface Bookmark {
     userId: string;
     propertyId: string;
 }
+
+
+// CHAT AREA -----------------
+export interface ChatMessage {
+    id: string;
+    senderId: number; // user ID or agent ID
+    receiverId: number; // receiver's user ID or agent ID
+    content: string;
+    createdAt: string; // timestamp
+    isRead: boolean;
+    conversationId: string;
+}
+
+export interface Conversation {
+    id: string;
+    participants: Participant[]; // usually 2 people: user and agent
+    messages: ChatMessage[];
+    lastMessage?: ChatMessage;
+    updatedAt: string;
+}
+
+export interface Participant {
+    id: number;
+    name: string;
+    avatar?: string;
+    role: 'user' | 'agent'; // or other roles if needed
+}
