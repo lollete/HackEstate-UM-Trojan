@@ -5,18 +5,21 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\EventController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\PropertyController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::get('/Property/{id}', [ClientController::class, 'ListingView'])->name('properties.listingView');
+// Route::get('/Property/{id}', [ClientController::class, 'ListingView'])->name('properties.listingView');
 Route::get('/Bookmark/', [ClientController::class, 'BookmarkView'])->name('properties.BookmarkView');
 Route::get('/Event/', [EventController::class, 'EventView'])->name('event.EventView');
 Route::get('/Event/{id}', [EventController::class, 'EventDetails'])->name('event.EventDetails');
 
 
 Route::get('/Chat',[ChatController::class,'Chatlist'])->name('agent.viewChat');
+Route::get('/properties', [PropertyController::class, 'index'])->name('properties.index');
+Route::get('/Property/{id}', [PropertyController::class, 'show'])->name('properties.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', action: function () {
