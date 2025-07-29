@@ -28,7 +28,7 @@ const EventListings: React.FC = () => {
 
     return (
         <div className="w-full flex flex-row sm:p-1 lg:p-8">
-            <div className='h-500 mx-5 border rounded w-90'>
+            <div className='mx-5 border rounded w-90'>
                 <SearchCard />
             </div>
             <div className='w-full'>

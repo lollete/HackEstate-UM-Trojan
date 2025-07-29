@@ -11,13 +11,7 @@ const sidebarNavItems: NavItem[] = [
         title: 'Property',
         href: '/Bookmark',
         icon: null,
-    },
-    {
-        title: 'Event',
-        href: '/settings/password',
-        icon: null,
-    },
-
+    }
 ];
 
 export default function BookmarkLayout({ children }: PropsWithChildren) {
@@ -30,7 +24,7 @@ export default function BookmarkLayout({ children }: PropsWithChildren) {
 
     return (
         <div className="px-4 py-6">
-            <Heading title="Settings" description="Manage your profile and account settings" />
+            <Heading title="Bookmark" description="Property Bookmarks " />
 
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">

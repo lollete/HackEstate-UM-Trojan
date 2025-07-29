@@ -4,12 +4,12 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, MessageCircleMore} from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, MessageCircleMore } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
     {
-        title: 'Dassshboard',
+        title: 'Dashboard',
         href: '/dashboard',
         icon: LayoutGrid,
     },
@@ -18,19 +18,55 @@ const mainNavItems: NavItem[] = [
         href: '/Bookmark',
         icon: MessageCircleMore,
     },
+    {
+        title: 'Event',
+        href: '/Event',
+        icon: null,
+    },
+    {
+        title: 'Overview',
+        href: '/admin/dashboard',
+        icon: null,
+    },
+    {
+        title: 'Feedback',
+        href: '/admin/feedback',
+        icon: null,
+    },
+    {
+        title: 'Request',
+        href: '/admin/property',
+        icon: null,
+    },
+    {
+        title: 'Transaction',
+        href: '/admin/transaction',
+        icon: null,
+    },
+    {
+        title: 'Create Event',
+        href: '/admin/event',
+        icon: null,
+    },
+    {
+        title: 'Request Tour',
+        href: '/admin/inbox',
+        icon: null,
+    },
+
 ];
 
 const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
+    // {
+    //     title: '',
+    //     href: '/admin/dashboard',
+    //     icon: Folder,
+    // },
+    // {
+    //     title: 'Documentation',
+    //     href: 'https://laravel.com/docs/starter-kits#react',
+    //     icon: BookOpen,
+    // },
 ];
 
 export function AppSidebar() {

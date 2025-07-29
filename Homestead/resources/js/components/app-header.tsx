@@ -11,7 +11,7 @@ import { useInitials } from '@/hooks/use-initials';
 import { cn } from '@/lib/utils';
 import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Menu, Search, Bookmark, MessageCircleMore } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Menu, Search, Bookmark, MessageCircleMore, Shield } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
 
@@ -27,23 +27,30 @@ const mainNavItems: NavItem[] = [
         href: '/Event',
         icon: null,
     },
+ 
+
 ];
 
 const rightNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
+    // {
+    //     title: 'Repository',
+    //     href: 'https://github.com/laravel/react-starter-kit',
+    //     icon: Folder,
+    // },
     {
         title: 'Chat',
-        href: '/Chat',
+        href: '/chat/1',
         icon: MessageCircleMore,
     },
     {
         title: 'Bookmark',
         href: '/Bookmark',
         icon: Bookmark,
+    },
+    {
+        title: 'Admin',
+        href: '/admin/dashboard',
+        icon: Shield,
     },
 ];
 

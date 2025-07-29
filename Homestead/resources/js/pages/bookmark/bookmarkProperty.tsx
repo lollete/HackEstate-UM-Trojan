@@ -94,8 +94,8 @@ export default function BookmarkPage() {
                                         </p>
                                     </div>
                                     <div className='flex flex-col justify-center items-center gap-2 px-4'>
-                                        <Button className='w-28 text-center' variant={"bgGreen"}>View</Button>
-                                        <Button className='w-28 text-center' variant={"bgGreen"}>Contact</Button>
+                                        <Button className='w-28 text-center'>View</Button>
+                                        <Button className='w-28 text-center' >Contact</Button>
                                     </div>
                                 </div>
                             ))}

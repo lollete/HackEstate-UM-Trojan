@@ -119,7 +119,7 @@ const ListingView: React.FC<Props> = ({ property }) => {
                                         </div>
                                     </div>
                                     <div className="flex space-x-2">
-                                        <a href={`/chat/${property.agent.id}`} className="text-blue-500 hover:underline">
+                                        <a href={`/chat/1`} className="text-blue-500 hover:underline">
                                             Contact Agent
                                         </a>
 

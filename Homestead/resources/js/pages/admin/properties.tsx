@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/react';
 import ChatPanel from '@/components/chat/ChatPanel';
 import RequestItem from '@/components/admin/ReqestItem';
 import Dashcom from '@/components/admin/dashboardComponent';
+import CreateProp from '@/components/admin/createProp';
 import Ancom from '@/components/admin/analyticComponent';
 import Trancom from '@/components/admin/transactionComponent';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
@@ -13,16 +14,16 @@ import Luma from '@/components/api/LumaEvents';
 import Bookmark from '@/pages/bookmark/bookmarkProperty';
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Dashboard',
-        href: '/admin/dashboard',
+        title: 'Property',
+        href: '/admin/property',
     },
 ];
 
-export default function Dashboard() {
+export default function Property() {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
-            <Dashcom />
+            <Head title="Property" />
+            <CreateProp />
         </AppLayout>
     );
 }

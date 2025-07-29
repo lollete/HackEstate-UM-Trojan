@@ -18,10 +18,9 @@ Route::get('/', function () {
 // Route::get('/Property/{id}', [ClientController::class, 'ListingView'])->name('properties.listingView');
 Route::get('/Bookmark/', [ClientController::class, 'BookmarkView'])->name('properties.BookmarkView');
 Route::get('/Agent-profile/1', [ClientController::class, 'ProfileAgent'])->name('agent.ProfileAgent');
-Route::get('/Event/', [EventController::class, 'EventView'])->name('event.EventView');
-Route::get('/Event/{id}', [EventController::class, 'EventDetails'])->name('event.EventDetails');
 
-
+Route::get('/events', [EventController::class, 'EventView'])->name('events.view');
+Route::get('/events/{id}', [EventController::class, 'EventDetails'])->name('events.details');
 
 // Route::get('/Chat', [ChatController::class, 'Chatlist'])->name('agent.viewChat');
 Route::get('/chats', [ChatController::class, 'index'])->name('chats.index');
@@ -40,6 +39,13 @@ Route::get('/agent/{id}', [ClientController::class, 'ProfileAgent']);
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.index');
+    Route::get('admin/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
+    Route::get('admin/properties', [AdminController::class, 'properties'])->name('admin.properties');
+    Route::get('admin/transaction', [AdminController::class, 'transaction'])->name('admin.transaction');
+    Route::get('admin/inbox', [AdminController::class, 'inbox'])->name('admin.inbox');
+    Route::get('admin/feedback', [AdminController::class, 'feedback'])->name('admin.feedback');
+    Route::get('admin/property', [AdminController::class, 'properties'])->name('admin.property');
+    Route::get('admin/event', [AdminController::class, 'CreateEvent'])->name('admin.createEvent');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
