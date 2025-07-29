@@ -25,7 +25,6 @@ export default function Dashboard() {
                     <PropertyList />
                 </div>
                 {/* <ChatBot/> */}
-                <AgentProfile/>
             </div>
             <Footer/>
         </AppLayout>

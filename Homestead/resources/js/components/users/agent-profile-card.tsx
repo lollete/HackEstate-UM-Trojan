@@ -1,5 +1,6 @@
 import React from 'react';
 import { MapPin, Mail, CheckCircle, UserCheck, Star } from 'lucide-react';
+import { Link } from '@inertiajs/react';
 
 export interface AgentProfile {
     id: string;
@@ -51,18 +52,22 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
                 />
                 {/* Avatar */}
                 <div className="absolute -bottom-12 left-4 sm:left-6 z-10">
-                    <img
-                        src={user.avatar}
-                        alt="Avatar"
-                        className="w-24  h-24 sm:w-32 sm:h-32 rounded-full border-4 border-white shadow-md object-cover bg-gray-100"
-                        onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = `https://placehold.co/128x128/CCCCCC/333333?text=${user.name
-                                .split(' ')
-                                .map((n) => n[0])
-                                .join('')}`;
-                        }}
-                    />
+
+                    <Link href={`/agent-profile/${user.id}`}>
+                        <img
+                            src={user.avatar}
+                            alt="Avatar"
+                            className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover bg-gray-100"
+                            onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = `https://placehold.co/128x128/CCCCCC/333333?text=${user.name
+                                    .split(' ')
+                                    .map((n) => n[0])
+                                    .join('')}`;
+                            }}
+                        />
+                    </Link>
+                
                 </div>
             </div>
 

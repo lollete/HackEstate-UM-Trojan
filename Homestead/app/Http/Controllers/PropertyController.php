@@ -37,9 +37,6 @@ class PropertyController extends Controller
         return response()->json($mapped);
     }
 
-    /**
-     * Show a single property by ID using Inertia (e.g., when clicking a card).
-     */
     public function show($id)
     {
         $property = Property::with('user')->findOrFail($id);
@@ -57,6 +54,8 @@ class PropertyController extends Controller
             'forRent' => $property->status === 'rented',
             'agent' => [
                 'name' => $property->user->name ?? 'Unknown Agent',
+                'banner' => $user->banner ?? 'https://via.placeholder.com/800x200',
+
                 'avatar' => $property->user->avatar ?? 'https://via.placeholder.com/100',
             ],
         ];

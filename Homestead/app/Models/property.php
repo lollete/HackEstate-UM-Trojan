@@ -26,23 +26,20 @@ class Property extends Model
         'image',
         'status',
     ];
-    public function agent()
-    {
-        return $this->belongsTo(Agent::class);
-    }
-    // 🔗 Relation to user (agent)
+    // public function agent()
+    // {
+    //     return $this->belongsTo(Agent::class);
+    // }
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    // 🔗 Features like garage, wifi
     public function features()
     {
         return $this->hasMany(PropertyFeature::class);
     }
 
-    // 🔗 Custom details like year built
     public function details()
     {
         return $this->hasMany(PropertyDetail::class);

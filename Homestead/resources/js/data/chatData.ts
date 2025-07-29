@@ -2,9 +2,9 @@ import { Property, ChatParticipant, ChatMessage, ChatConversation } from '@/type
 
 // Agents Data
 export const agents: ChatParticipant[] = [
-    { id: 'agent1', name: 'John Doe', avatar: 'https://picsum.photos/id/1005/50/50' },
-    { id: 'agent2', name: 'Jane Smith', avatar: 'https://picsum.photos/id/1011/50/50' },
-    { id: 'agent3', name: 'Robert Brown', avatar: 'https://picsum.photos/id/1025/50/50' },
+    { id: 1, name: 'John Doe', avatar: 'https://picsum.photos/id/1005/50/50' },
+    { id: 2, name: 'Jane Smith', avatar: 'https://picsum.photos/id/1011/50/50' },
+    { id: 3, name: 'Robert Brown', avatar: 'https://picsum.photos/id/1025/50/50' },
 ];
 
 // Properties Data (you can import this from your existing property.ts if needed)

@@ -14,6 +14,7 @@ const properties: Property[] = [
         bathrooms: 2,
         price: 10000000,
         agent: {
+            id: 1,
             name: 'John Doe',
             avatar: 'https://picsum.photos/id/237/200/300' 
         },
@@ -45,6 +46,7 @@ const properties: Property[] = [
         bathrooms: 3,
         price: 15000000,
         agent: {
+            id: 2,
             name: 'Jane Smith',
             avatar: 'https://picsum.photos/id/237/200/300'
         },
@@ -76,6 +78,7 @@ const properties: Property[] = [
         bathrooms: 1,
         price: 5000000,
         agent: {
+            id: 1,
             name: 'Peter Jones',
             avatar: 'https://picsum.photos/id/237/200/300'
         },

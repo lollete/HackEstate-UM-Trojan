@@ -29,5 +29,4 @@ const useProperties = () => {
     return { properties, loading, error };
 };
 
-// Make sure you're using default export
 export default useProperties;

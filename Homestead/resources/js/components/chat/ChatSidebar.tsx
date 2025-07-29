@@ -3,8 +3,8 @@ import { Search, PlusCircle } from 'lucide-react';
 
 interface ChatSidebarProps {
     conversations: ChatConversation[];
-    activeConversationId: string;
-    setActiveConversationId: (id: string) => void;
+    activeConversationId: number;
+    setActiveConversationId: (id: number) => void;
 }
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({

@@ -46,10 +46,11 @@ export interface User {
 
 // 
 
-export interface Agent {
+export type Agent = {
+    id: number;
     name: string;
-    avatar: string; // URL to the agent's avatar
-}
+    avatar: string;
+};
 
 export interface Property {
     id: string;
@@ -120,7 +121,7 @@ export interface ChatMessage {
 }
 
 export interface ChatParticipant {
-    id: string;
+    id: number;
     name: string;
     avatar: string;
     lastMessageTime?: string;

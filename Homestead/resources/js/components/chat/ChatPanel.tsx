@@ -1,15 +1,16 @@
+import AppLayout from '@/layouts/app-layout';
+import { Head } from '@inertiajs/react';
 import { useState, useRef, useEffect } from 'react';
 import { getSortedConversations } from '@/data/chatData';
-import ChatSidebar from './ChatSidebar';
-import ChatMainArea from './ChatMainArea';
-import { Phone, MoreVertical, Image, ThumbsUp, Send } from 'lucide-react';
+import ChatSidebar from '@/components/chat/ChatSidebar';
+import ChatMainArea from '@/components/chat/ChatMainArea';
 
-const ChatPanel = () => {
-    const [activeConversationId, setActiveConversationId] = useState<string>(
-        getSortedConversations()[0]?.agent.id || ''
+export default function ChatView({ agent }: { agent: any }) {
+    const [activeConversationId, setActiveConversationId] = useState<number>(
+        agent?.id?.toString() || getSortedConversations()[0]?.agent.id || ''
     );
     const [inputValue, setInputValue] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement>(null!); // Using non-null assertion
+    const messagesEndRef = useRef<HTMLDivElement>(null!);
 
     const sortedConversations = getSortedConversations();
     const activeConversation = sortedConversations.find(
@@ -34,29 +35,31 @@ const ChatPanel = () => {
             timestamp: new Date().toISOString(),
         };
 
-        // In a real app, you would update the backend here
+        // In real implementation, update to server/backend here
         activeConversation.messages.push(newMessage);
         setInputValue('');
     };
 
     return (
-        <div className=" flex justify-center p-4 sm:p-6 font-sans antialiased">
-            <div className=" w-full max-w-6xl h-[90vh] max-h-[700px] flex overflow-hidden">
-                <ChatSidebar
-                    conversations={sortedConversations}
-                    activeConversationId={activeConversationId}
-                    setActiveConversationId={setActiveConversationId}
-                />
-                <ChatMainArea
-                    activeConversation={activeConversation}
-                    inputValue={inputValue}
-                    setInputValue={setInputValue}
-                    handleSendMessage={handleSendMessage}
-                    messagesEndRef={messagesEndRef}
-                />
+    <div className='w-full'>
+    
+            <Head title={`Chat with ${agent?.name || 'Agent'}`} />
+            <div className="flex justify-center p-4 sm:p-6 font-sans antialiased">
+                <div className="w-full max-w-6xl h-[90vh] max-h-[700px] flex overflow-hidden">
+                    <ChatSidebar
+                        conversations={sortedConversations}
+                        activeConversationId={activeConversationId}
+                        setActiveConversationId={setActiveConversationId}
+                    />
+                    <ChatMainArea
+                        activeConversation={activeConversation}
+                        inputValue={inputValue}
+                        setInputValue={setInputValue}
+                        handleSendMessage={handleSendMessage}
+                        messagesEndRef={messagesEndRef}
+                    />
+                </div>
             </div>
-        </div>
+    </div>
     );
-};
-
-export default ChatPanel;
+}
