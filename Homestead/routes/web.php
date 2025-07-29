@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AgentController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\ClientController;
@@ -37,6 +38,9 @@ Route::get('/chat/index-data', [ChatController::class, 'indexData'])->middleware
 Route::get('/agent/{id}', [ClientController::class, 'ProfileAgent']);
 
 
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('admin/dashboard', [AdminController::class, 'index'])->name('admin.index');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', action: function () {
