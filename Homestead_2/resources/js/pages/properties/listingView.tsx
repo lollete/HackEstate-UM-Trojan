@@ -94,7 +94,9 @@ const ListingView: React.FC<Props> = ({ property }) => {
                                 <div className="flex items-center"><Ruler className="w-4 h-4 mr-1 text-gray-500" /> {property.size} Sqft</div>
                             </div>
 
-                            <p className="text-4xl font-extrabold text-green-600 mb-6">₱{property.price.toLocaleString()}</p>
+                            <p className="text-4xl font-extrabold text-green-600 mb-6">
+                                {new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(property.price)}
+                            </p>
 
                             <div className="flex space-x-4 mb-6">
                                 <button className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"><Heart className="w-5 h-5 mr-2" /> Like</button>

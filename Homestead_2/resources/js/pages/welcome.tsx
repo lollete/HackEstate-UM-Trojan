@@ -1,285 +1,148 @@
+// import { type SharedData } from '@/types';
+// import { Head, Link, usePage } from '@inertiajs/react';
+// import { Bookmark, Cable, Mail, MapPin, Search } from "lucide-react";
+import { NavLanding } from '@/components/nav-landing';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
-import { Bookmark, Cable, Mail, MapPin, Search } from "lucide-react";
+import { Bookmark, Cable, Mail, MapPin, Search, MessageCircle } from "lucide-react";
+import { useState } from "react";
+// import { type BreadcrumbItem, type PaginatedEvents } from '@/types';
 
-function App() {
-    const { auth } = usePage<SharedData>().props;
+import { EventCard } from '@/components/event/eventCard';
+import { type PaginatedEvents } from '@/types';
+
+interface EventIndexProps {
+    events: PaginatedEvents;
+}
+
+export default function Appsw({ events }: EventIndexProps) {
+
+
+    // Define footer navigation items
+    const items: { label: string; href: string }[] = [];
+    const defaultItems = [
+        { label: "Home", href: "/" },
+        { label: "Buy Properties", href: "/buyProperties" },
+        { label: "Rent Properties", href: "/rentProperties" },
+        { label: "Events", href: "/events" },
+        { label: "Agessnts", href: "/agents" },
+        { label: "Contact", href: "/contact" },
+    ];
 
     return (
         <>
-            <Head title="Welcome">
+            <Head title="Homestead">
                 <link rel="preconnect" href="https://fonts.bunny.net" />
                 <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
             </Head>
+            <div className="text-gray-800">
+                <NavLanding items={[]} />
+                <header
+                    className="relative bg-cover bg-center bg-no-repeat h-[600px]"
+                    style={{ backgroundImage: "url('https://i.pinimg.com/736x/0f/a6/89/0fa6892787841abdc4d6275511d14f91.jpg')" }}
+                >
 
-
-            <nav className="shadow">
-                <div className="max-w-7xl mx-auto p-5 flex items-center justify-between ">
-                    <a href="#">
-                        <img src="/hori-logo.png" alt="homestead logo" className="w-50" />
-                    </a>
-
-                    <ul className="flex items-center gap-5">
-                        <li>
-                            <a href="#">About</a>
-                        </li>
-                        <li>
-                            <a href="#">How it works</a>
-                        </li>
-                        <li>
-                            <a href="#">Contact</a>
-                        </li>
-                        <li>
-                            <button className="text-white bg-dark-green py-2 px-10 rounded-md font-bold">
-                                {auth.user ? (
-                                    <Link
-                                        href={route('dashboard')}
-                                        className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                                    >
-                                        Dashboard
-                                    </Link>
-                                ) : (
-                                    <>
-                                        <Link
-                                            href={route('login')}
-                                            className="inline-block rounded-sm border border-transparent px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#19140035] dark:text-[#EDEDEC] dark:hover:border-[#3E3E3A]"
-                                        >
-                                            Log in
-                                        </Link>
-                                        <Link
-                                            href={route('register')}
-                                            className="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
-                                        >
-                                            Register
-                                        </Link>
-                                    </>
-                                )}
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
-
-            <header>
-                <div className="grid grid-cols-2 gap-16 justify-between max-w-7xl mx-auto pt-16 pb-24">
-                    <div>
-                        <h1 className="flex flex-col gap-5 mb-10">
-                            <span className="font-bold text-5xl">
-                                Find your perfect property or event, all in one place
-                            </span>
-                            <span className="text-2xl">
-                                Homestead is the smart property and event platform that helps
-                                agents manage their listings effortlessly — while giving users a
-                                simple way to discover homes and happenings tailored to their
-                                needs.
-                            </span>
+                    <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-6">
+                        <h1 className="text-5xl font-bold mb-6">
+                            Find your perfect property or event, all in one place
                         </h1>
-                        <div className="flex items-center gap-5">
-                            <button className="text-white bg-dark-green py-2 px-10 rounded-md font-bold cursor-pointer">
-                                Try it now
-                            </button>
-                            <button className="border border-dark-green text-dark-green py-2 px-10 rounded-md cursor-pointer">
-                                Learn more
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-center items-center">
-                        <img src="/square-logo.png" alt="homestead" className="w-[300px]" />
-                    </div>
-                </div>
-            </header>
-
-            <main>
-                <section className="max-w-7xl mx-auto pb-26">
-                    <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
-                        <span className="text-dark-green">About</span>
-                        <span>Us</span>
-                    </h2>
-
-                    <p className="text-lg text-justify mb-16">
-                        Homestead is the all‑in‑one platform that makes it easy to discover,
-                        manage, and share properties and events. Whether you’re a client
-                        looking for the perfect home or an agent managing your listings,
-                        Homestead brings security, smart tools, and simplicity together in
-                        one place.
-                    </p>
-
-                    <div className="grid md:grid-cols-2 gap-12">
-                        {/* Clients Column */}
-                        <div className="border border-dark-green p-5 rounded-md">
-                            <h3 className="text-2xl font-semibold mb-6">For Clients</h3>
-                            <ul className="space-y-4 text-gray-700">
-                                <li>
-                                    🔍 <b>Smart Search</b>: Filter by category, budget, and
-                                    location.
-                                </li>
-                                <li>
-                                    🏠 <b>3D Walkthroughs</b>: Explore properties virtually before
-                                    visiting.
-                                </li>
-                                <li>
-                                    ⭐ <b>Feedback & Ratings</b>: Rate agents and bookmark
-                                    listings.
-                                </li>
-                                <li>
-                                    🛡 <b>Trusted & Secure</b>: AI detects fake listings and scams.
-                                </li>
-                                <li>
-                                    📍 <b>Geo‑tagging & Risk Info</b>: See nearby amenities and
-                                    risks.
-                                </li>
-                                <li>
-                                    💬 <b>Direct Communication</b>: Chat with agents easily.
-                                </li>
-                            </ul>
-                        </div>
-
-                        {/* Agents Column */}
-                        <div className="border border-dark-green p-5 rounded-md">
-                            <h3 className="text-2xl font-semibold mb-6">
-                                For Agents & Listers
-                            </h3>
-                            <ul className="space-y-4 text-gray-700">
-                                <li>
-                                    📊 <b>Analytics Dashboard</b>: Track views, sales, and
-                                    performance.
-                                </li>
-                                <li>
-                                    🗓 <b>Property & Event Management</b>: Manage rentals and
-                                    bookings.
-                                </li>
-                                <li>
-                                    🎟 <b>Event Hosting Tools</b>: Tickets, QR validation, and
-                                    participant tracking.
-                                </li>
-                                <li>
-                                    🎨 <b>Customizable Listings</b>: Personalize layouts.
-                                </li>
-                                <li>
-                                    👥 <b>Team Collaboration</b>: Add team members.
-                                </li>
-                                <li>
-                                    🔔 <b>Notifications & Security</b>: Stay updated with logs &
-                                    KYC.
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="max-w-7xl mx-auto pb-26">
-                    <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
-                        <span className="text-dark-green">How</span>
-                        <span>It Works</span>
-                    </h2>
-
-                    <div className="grid grid-cols-3 gap-5">
-                        <div className="border border-dark-green p-5 rounded-md">
-                            <div className="flex items-center gap-5 mb-5">
-                                <div className="border border-dark-green w-15 h-15 flex items-center justify-center rounded-full">
-                                    <Cable color="#1f8505" size={30} />
-                                </div>
-                                <p className="text-dark-green text-2xl font-bold">
-                                    Connect & Verify
-                                </p>
-                            </div>
-
-                            <p className="text-lg">
-                                Chat directly with trusted agents and sellers. Every agent goes
-                                through KYC verification, and our AI security checks help
-                                protect you from scams, fake documents, or risky listings.
-                            </p>
-                        </div>
-                        <div className="border border-dark-green p-5 rounded-md">
-                            <div className="flex items-center gap-5 mb-5">
-                                <div className="border border-dark-green w-15 h-15 flex items-center justify-center rounded-full">
-                                    <Search color="#1f8505" size={30} />
-                                </div>
-                                <p className="text-dark-green text-2xl font-bold">
-                                    Search & Discover
-                                </p>
-                            </div>
-
-                            <p className="text-lg">
-                                Find your perfect property or event in seconds. Our powerful
-                                filters, categories, and geo‑tagging make it easy to explore
-                                listings that match your needs, whether it’s a dream home, land,
-                                or a special event venue.
-                            </p>
-                        </div>
-                        <div className="border border-dark-green p-5 rounded-md">
-                            <div className="flex items-center gap-5 mb-5">
-                                <div className="border border-dark-green w-15 h-15 flex items-center justify-center rounded-full">
-                                    <Bookmark color="#1f8505" size={30} />
-                                </div>
-                                <p className="text-dark-green text-2xl font-bold">
-                                    Book or List
-                                </p>
-                            </div>
-
-                            <p className="text-lg">
-                                Rent, buy, or host — all in one place. Whether you’re booking
-                                your next home or creating an event, Homestead makes the process
-                                smooth with built‑in calendars, smart reminders, and instant
-                                confirmations.
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                <section className="max-w-7xl mx-auto pb-28">
-                    <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
-                        <span className="text-dark-green">Contact</span>
-                        <span>Us</span>
-                    </h2>
-
-                    <div className="max-w-7xl mx-auto border border-dark-green rounded-md p-5">
-                        <p className="font-bold text-2xl mb-5">Talk With Us</p>
-
-                        <p className="text-lg mb-2">
-                            Questions, comments, or suggestions? Just fill the for and we will
-                            be in touch.
+                        <p className="text-xl mb-8 max-w-3xl">
+                            Homestead is the smart property and event platform that helps agents manage
+                            their listings effortlessly — while giving users a simple way to discover homes
+                            and happenings tailored to their needs.
                         </p>
-
-                        <ul className="text-lg">
-                            <li className="flex items-center gap-2">
-                                <MapPin color="#FF0000" />
-                                <span>Davao City</span>
-                            </li>
-                            <li className="flex items-center gap-2">
-                                <Mail color="#964B00" />
-                                <span>homestead@gmail.com</span>
-                            </li>
-                        </ul>
+                        <div className="w-full max-w-2xl bg-white rounded-md shadow-lg flex overflow-hidden">
+                            <select className="px-5 py-3 text-sm bg-gray-100 text-black outline-none border-r border-gray-300">
+                                <option value="all">All</option>
+                                <option value="buy">Buy</option>
+                                <option value="rent">Rent</option>
+                                <option value="event">Event</option>
+                            </select>
+                            <input
+                                type="text"
+                                placeholder="Search properties or events..."
+                                className="flex-1 px-6 py-3 text-sm text-black outline-none"
+                            />
+                            <button className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 text-sm font-bold flex items-center justify-center">
+                                <Search className="w-5 h-5" />
+                            </button>
+                        </div>
                     </div>
-                </section>
+                </header>
 
-                <footer className="border-t border-dark-green">
-                    <div className="max-w-7xl mx-auto p-10 grid grid-cols-2">
-                        <a href="#">
-                            <img src="/hori-logo.png" alt="homestead" className="w-50" />
-                        </a>
+                <main>
+                    <section className="max-w-7xl mx-auto py-10">
+                        <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
+                            <span className="font-normal">Recommended</span>
+                            <span className="text-green-600 font-extrabold">Properties</span>
+                        </h2>
+                        {/* Put here the cards for the recommended properties */}
+                    </section>
 
-                        <ul className="flex flex-col items-end gap-2 text-lg">
-                            <li>
-                                <a href="#">Contact Us</a>
-                            </li>
-                            <li>
-                                <a href="#">Our Team</a>
-                            </li>
-                            <li>
-                                <a href="#">Terms of Service</a>
-                            </li>
-                            <li>
-                                <a href="#">Locations</a>
-                            </li>
-                        </ul>
-                    </div>
-                </footer>
-            </main>
+                    <section className="max-w-7xl mx-auto py-10">
+                        <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
+                            <span className="text-green-600 font-extrabold">Event</span>
+                            <span className="font-normal">Highlights</span>
+                        </h2>
+                        {/* Put here the cards for the event highlights */}
+                        {events.data.map((event) => (
+                            <EventCard
+                                key={event.event_id}
+                                event={{
+                                    id: Number(event.event_id),
+                                    name: event.name,
+                                    location: event.location,
+                                    date: event.date,
+                                    price: event.price,
+                                    image: event.image,
+                                    user: event.user,
+                                }}
+                            />
+                        ))}
+                    </section>
+
+                    <section className="max-w-7xl mx-auto py-10">
+                        <h2 className="text-3xl font-bold flex items-center gap-2 mb-5">
+                            <span className="font-normal">Featured</span>
+                            <span className="text-green-600 font-extrabold">Agents</span>
+                        </h2>
+                        {/* Put here the cards for the featured agents */}
+                    </section>
+
+                    <footer className="border-t border-gray-200 bg-white text-gray-700">
+                        <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col gap-6 sm:flex-row sm:justify-between sm:items-start">
+                            {/* Left Column */}
+                            <div className="text-center sm:text-left">
+                                <Link href="/" aria-label="Go to homepage">
+                                    <img src="/hori-logo.png" alt="Homestead Logo" className="w-40 mx-auto sm:mx-0" />
+                                </Link>
+                                <p className="text-sm text-gray-500 mt-3">
+                                    © {new Date().getFullYear()} Homestead. All rights reserved.
+                                </p>
+                            </div>
+
+                            {/* Right Column: Links */}
+                            <div className="text-center sm:text-right">
+                                <ul className="flex flex-col gap-2 text-base">
+                                    {(items.length > 0 ? items : defaultItems).map((item, idx) => (
+                                        <li key={idx}>
+                                            <Link
+                                                href={item.href}
+                                                className="hover:text-green-600 transition-colors"
+                                            >
+                                                {item.label}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </footer>
+                </main>
+
+                {/* Chat Button */}
+          
+            </div>
         </>
     );
 }
-
-export default App;

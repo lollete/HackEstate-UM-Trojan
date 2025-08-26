@@ -39,36 +39,14 @@ export default function Dashboard() {
             <Head title="Dashboard" />
             <div className="flex h-full flex-col">
                 <div className="min-h-screen">
-                    {/* 🔍 AI Search Box */}
-                    <div className="p-4">
-                        <input
-                            type="text"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            placeholder="Ask AI about properties..."
-                            className="border p-2 w-full rounded"
-                        />
-                        <button
-                            onClick={handleSearch}
-                            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
-                        >
-                            Search
-                        </button>
-                        {result && (
-                            <div className="mt-4 p-3 border rounded bg-gray-50">
-                                <strong>AI Result:</strong> {result}
-                            </div>
-                        )}
-                    </div>
+                
 
                     {/* Existing components */}
                     <PropertyList />
-                    {/* <GEO /> */}
-                    {/* <Fesd /> */}
+             
                 </div>
-                {/* <ChatBot/> */}
+                <ChatBot/>
             </div>
-            <Footer />
         </AppLayout>
     );
 }

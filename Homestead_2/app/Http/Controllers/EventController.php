@@ -36,7 +36,18 @@ class EventController extends Controller
             'filters' => $request->only(['search', 'type']),
         ]);
     }
+    public function FeatureEventView(Request $request)
+    {
+        // $sort = $request->input('sort', 'top');
 
+        $events = Event::query()
+            ->with(['user']);
+
+        return Inertia::render('event/Index', [
+            'events' => $events,
+      
+        ]);
+    }
     // app/Http/Controllers/EventController.php
     public function EventDetails(Event $event)
     {

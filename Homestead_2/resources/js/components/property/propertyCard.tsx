@@ -58,8 +58,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
                         </div>
                     </div>
                     <p className="mb-0 text-green-600 font-bold text-[14px]">
-                        ₱{price.toLocaleString()}
+                        {new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' }).format(property.price)}
                     </p>
+                 
+
                 </div>
             </div>
             <div className='px-3 font-bold'>

@@ -71,7 +71,7 @@ const App: React.FC = () => {
         }
     };
 
-    // 🔑 Gemini API Integration
+    // GEMENI NALNG 
     const generateBotResponse = async (userMessage: string): Promise<string> => {
         const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
@@ -106,7 +106,7 @@ const App: React.FC = () => {
     };
 
     return (
-        <div className="font-sans antialiased bg-gray-100 flex items-center justify-center min-h-screen">
+        <div className="font-sans antialiased  flex items-end justify-end ">
             {/* Floating Button */}
             <button
                 onClick={() => setIsOpen(true)}
@@ -118,8 +118,8 @@ const App: React.FC = () => {
 
             {/* Chat Modal */}
             {isOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col h-[90vh] max-h-[600px] overflow-hidden transform transition-all duration-300 scale-100 opacity-100">
+                <div className="fixed inset-0  shadow-2xs flex items-center justify-end p-4 z-50">
+                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md flex flex-col h-[90vh] max-h-[600px] overflow-hidden transform transition-all duration-300 scale-100 opacity-100">
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 bg-gray-50 border-b border-gray-200 rounded-t-2xl">
                             <div className="flex items-center space-x-3">
@@ -146,8 +146,8 @@ const App: React.FC = () => {
                                 >
                                     <div
                                         className={`flex items-start max-w-[80%] p-3 rounded-xl shadow-sm ${message.sender === 'user'
-                                                ? 'bg-blue-500 text-white rounded-br-none'
-                                                : 'bg-gray-200 text-gray-800 rounded-bl-none'
+                                            ? 'bg-blue-500 text-white rounded-br-none'
+                                            : 'bg-gray-200 text-gray-800 rounded-bl-none'
                                             }`}
                                     >
                                         {message.sender === 'bot' && (
