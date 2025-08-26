@@ -1,10 +1,30 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem
+} from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, MessageCircleMore, ShieldQuestionIcon} from 'lucide-react';
+import {
+    LayoutGrid,
+    Bookmark,
+    Calendar,
+    BarChart3,
+    MessageSquareText,
+    Home,
+    FileText,
+    CreditCard,
+    CalendarDays,
+    Inbox,
+    ShieldQuestion
+} from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -16,56 +36,50 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Bookmark',
         href: '/Bookmark',
-        icon: MessageCircleMore,
+        icon: Bookmark,
     },
     {
-        title: 'Event',
+        title: 'Events',
         href: '/Event',
-        icon: null,
+        icon: Calendar,
     },
     {
         title: 'Overview',
         href: '/admin/dashboard',
-        icon: null,
+        icon: BarChart3,
     },
     {
         title: 'Feedback',
         href: '/admin/feedback',
-        icon: null,
+        icon: MessageSquareText,
     },
     {
-        title: 'Property',
+        title: 'Properties',
         href: '/admin/property',
-        icon: null,
+        icon: Home,
     },
     {
-        title: 'Transaction',
+        title: 'Transactions',
         href: '/admin/transaction',
-        icon: null,
+        icon: CreditCard,
     },
     {
-        title: 'Event',
+        title: 'Admin Events',
         href: '/admin/event',
-        icon: null,
+        icon: CalendarDays,
     },
     {
         title: 'Request Tour',
         href: '/admin/inbox',
-        icon: null,
+        icon: Inbox,
     },
-
 ];
 
 const footerNavItems: NavItem[] = [
-    // {
-    //     title: '',
-    //     href: '/admin/dashboard',
-    //     icon: Folder,
-    // },
     {
         title: 'Verification',
         href: '/admin/verification',
-        icon: ShieldQuestionIcon,
+        icon: ShieldQuestion,
     },
 ];
 

@@ -1,8 +1,6 @@
-import React, { useState, useMemo } from 'react';
-// Lucide React Icons for Property Form and Event Table actions
-import { Home, MapPin, DollarSign, Bed, Bath, Maximize, Image as ImageIcon, PlusCircle, X as CloseIcon } from 'lucide-react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import { Home, MapPin, DollarSign, Bed, Bath, Maximize, Image as ImageIcon, PlusCircle, X as CloseIcon, Edit, Eye, Trash2, Repeat, MoreHorizontal, Upload } from 'lucide-react';
 
-// Shadcn UI Components
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,108 +12,183 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 // --- 1. Interface Definitions ---
 
-// Interface for the Property Listing Form data
-interface ListingFormData {
+interface PropertyListing {
+    id: string;
     propertyName: string;
     listingType: 'forSale' | 'forRent' | '';
     price: number | null;
     location: string;
-    bedrooms: number | null;
-    bathrooms: number | null;
-    sizeSqFt: number | null;
+    numBedrooms: number | null;
+    numBathrooms: number | null;
+    areaSqFt: number | null;
     description: string;
-    imageUrl: string; // Placeholder for image upload
+    imageUrl: string[]; // Array of image URLs (can include Data URLs for local previews)
+    status: 'available' | 'pending' | 'sold' | 'rented' | 'draft';
 }
 
-// Interface for an Event object (used in the Event Table)
-interface Event {
-    id: string;
-    name: string;
-    date: string; // YYYY-MM-DD
-    start_time: string; // HH:MM
-    end_time: string; // HH:MM
-    location: string;
-    description: string;
-    status: 'published' | 'archived' | 'draft';
-    type: string;
-    price: number;
-    image?: string; // Optional image URL
-}
+// --- 2. Dummy Data Generation for Property Listings (Simulating AdminController Data) ---
 
-// --- 2. Dummy Data Generation for Events ---
-
-// Function to generate a large array of dummy event data
-const generateDummyEvents = (count: number): Event[] => {
-    const types = ['conference', 'seminar', 'workshop', 'meetup', 'webinar', 'exhibition', 'festival', 'other'];
-    const locations = ['SMX Convention Center, Davao City', 'Ayala Malls Activity Center, Davao City', 'Online', 'Park Inn by Radisson, Davao City', 'World Trade Center, Davao City', 'Malagos Garden Resort, Davao City'];
-    const statuses = ['published', 'archived', 'draft'];
+const generateDummyListings = (count: number): PropertyListing[] => {
+    const propertyTypes = ['house', 'condo', 'apartment', 'land', 'commercial'];
+    const locations = ['Ma-a, Davao City', 'Bajada, Davao City', 'Cabantian, Davao City', 'Toril, Davao City', 'Catalunan Grande, Davao City'];
+    const statuses = ['available', 'pending', 'sold', 'rented', 'draft'];
     const descriptions = [
-        'A deep dive into the latest industry trends and innovations. Networking opportunities included.',
-        'Hands-on workshop to learn practical skills in web development. Bring your laptop!',
-        'An exclusive gathering for startups to pitch their ideas to investors and mentors.',
-        'Explore sustainable practices for a greener future. Open to all environmental advocates.',
-        'Celebration of local arts and culture featuring live performances and artisan crafts.',
-        'Annual summit bringing together leaders and experts from various sectors.',
-        'Community cleanup drive to preserve our natural environment. Volunteers welcome.',
-        'Virtual event focusing on advanced data science techniques. Interactive Q&A session.',
-        'Local food fair showcasing the best culinary delights from Davao region.',
-        'Family-friendly event with games, rides, and entertainment for all ages.'
+        'A beautiful family home with a spacious garden and modern amenities.',
+        'Luxurious condominium unit with a stunning city view, close to central business district.',
+        'Affordable apartment perfect for students or young professionals, near universities.',
+        'Prime commercial lot suitable for office buildings or retail development.',
+        'Expansive land for future development, excellent investment opportunity.',
+        'Cozy bungalow with two bedrooms, ideal for a small family.',
+        'High-rise condo with premium facilities, including a gym and swimming pool.',
+        'Beachfront property, perfect for a vacation home or resort development.',
+        'Industrial warehouse with ample space and easy access to major roads.',
+        'Townhouse with three levels, multiple bathrooms, and a private garage.',
     ];
-    const baseDate = new Date('2025-07-30T00:00:00');
 
     return Array.from({ length: count }, (_, i) => {
-        const eventDate = new Date(baseDate);
-        eventDate.setDate(baseDate.getDate() + i * (Math.floor(Math.random() * 5) + 1));
+        const listingType = i % 2 === 0 ? 'forSale' : 'forRent';
+        const status = statuses[i % statuses.length] as PropertyListing['status'];
 
-        const randomHourStart = String(Math.floor(Math.random() * (17 - 8 + 1)) + 8).padStart(2, '0');
-        const randomHourEnd = String(parseInt(randomHourStart) + Math.floor(Math.random() * 4) + 1).padStart(2, '0');
+        const numImages = Math.floor(Math.random() * 3) + 2; // 2, 3, or 4 images
+        const imageUrls = Array.from({ length: numImages }, (_, imgIdx) =>
+            `https://placehold.co/300x200/ADD8E6/000000?text=Property+${i + 1}+Img+${imgIdx + 1}`
+        );
 
         return {
-            id: `evt-${i + 1}`,
-            name: `Davao ${types[i % types.length].replace(/\b\w/g, char => char.toUpperCase())} Series ${i + 1}`,
-            date: eventDate.toISOString().split('T')[0],
-            start_time: `${randomHourStart}:00`,
-            end_time: `${randomHourEnd}:00`,
+            id: `prop-${i + 1}`,
+            propertyName: `${propertyTypes[i % propertyTypes.length].charAt(0).toUpperCase() + propertyTypes[i % propertyTypes.length].slice(1)} in ${locations[i % locations.length]}`,
+            listingType: listingType,
+            price: listingType === 'forSale'
+                ? parseFloat((Math.random() * (20000000 - 1000000) + 1000000).toFixed(2))
+                : parseFloat((Math.random() * (50000 - 10000) + 10000).toFixed(2)),
             location: locations[i % locations.length],
+            numBedrooms: Math.floor(Math.random() * 5) + 1,
+            numBathrooms: Math.floor(Math.random() * 3) + 1,
+            areaSqFt: Math.floor(Math.random() * (3000 - 500) + 500),
             description: descriptions[i % descriptions.length],
-            status: statuses[i % statuses.length] as 'published' | 'archived' | 'draft',
-            type: types[i % types.length],
-            price: i % 4 === 0 ? 0 : parseFloat((Math.random() * (1500 - 50) + 50).toFixed(2)),
-            image: `https://picsum.photos/id/${100 + i}/300/200`,
+            imageUrl: imageUrls,
+            status: status,
         };
     });
 };
 
-const initialEvents = generateDummyEvents(50);
+const initialListings = generateDummyListings(50);
+
+// --- Custom Confirmation Modal Component ---
+interface ConfirmationModalProps {
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
+const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, title, message, onConfirm, onCancel }) => {
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+            <Card className="w-full max-w-sm rounded-lg shadow-xl">
+                <CardHeader className="p-4 sm:p-6 border-b border-gray-200">
+                    <CardTitle className="text-xl font-bold text-gray-900">{title}</CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 sm:p-6 space-y-4">
+                    <p className="text-gray-700">{message}</p>
+                    <div className="flex justify-end space-x-3">
+                        <Button
+                            variant="outline"
+                            onClick={onCancel}
+                            className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            onClick={onConfirm}
+                            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                        >
+                            Confirm
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
+
 
 // --- 3. Main Integrated Management Dashboard Component ---
 const IntegratedManagementDashboard: React.FC = () => {
-    // State for the Property Listing Form
-    const [listingFormData, setListingFormData] = useState<ListingFormData>({
+    // Define initial empty form data for a new listing
+    const initialListingFormData: PropertyListing = {
+        id: '',
         propertyName: '',
         listingType: '',
         price: null,
         location: '',
-        bedrooms: null,
-        bathrooms: null,
-        sizeSqFt: null,
+        numBedrooms: null,
+        numBathrooms: null,
+        areaSqFt: null,
         description: '',
-        imageUrl: '',
-    });
+        imageUrl: [], // Initialize as empty array
+        status: 'draft',
+    };
+
+    // State for the Property Listing Form (used for create/edit)
+    const [listingFormData, setListingFormData] = useState<PropertyListing>(initialListingFormData);
+    const [newImageUrl, setNewImageUrl] = useState<string>(''); // State for the single image URL input
+    const fileInputRef = useRef<HTMLInputElement>(null); // Ref for the file input
+
+    // State for the currently viewed/edited listing (for the modal)
+    const [selectedListing, setSelectedListing] = useState<PropertyListing | null>(null);
 
     // State to control modal visibility for the property listing form
     const [isListingModalOpen, setIsListingModalOpen] = useState(false);
+    type ModalAction = 'create' | 'edit' | 'view';
+    const [currentModalAction, setCurrentModalAction] = useState<ModalAction>('create');
 
-    // State for the Event Management Table
-    const [events, setEvents] = useState<Event[]>(initialEvents);
+
+    // State for the Property Listings Management Table
+    const [listings, setListings] = useState<PropertyListing[]>(initialListings); // Using local dummy data
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortColumn, setSortColumn] = useState<keyof Event | null>(null);
+    const [sortColumn, setSortColumn] = useState<keyof PropertyListing | null>(null);
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-    const eventsPerPage = 8;
+    const listingsPerPage = 8;
+
+    // --- Filtration Bar States ---
+    const [filterListingType, setFilterListingType] = useState<'forSale' | 'forRent' | 'all-types'>('all-types');
+    const [filterStatus, setFilterStatus] = useState<PropertyListing['status'] | 'all-statuses'>('all-statuses');
+    const [filterMinBedrooms, setFilterMinBedrooms] = useState<number | ''>('');
+    const [filterMinBathrooms, setFilterMinBathrooms] = useState<number | ''>('');
+
+    // State for custom confirmation modal
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [confirmModalDetails, setConfirmModalDetails] = useState({
+        title: '',
+        message: '',
+        onConfirm: () => { },
+    });
+
+    // Effect to update form data when selectedListing changes for edit/view
+    useEffect(() => {
+        if (selectedListing && (currentModalAction === 'edit' || currentModalAction === 'view')) {
+            setListingFormData(selectedListing);
+        } else if (currentModalAction === 'create') {
+            setListingFormData(initialListingFormData);
+        }
+    }, [selectedListing, currentModalAction]);
+
 
     // --- Property Form Handlers ---
     const handleListingFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -126,38 +199,93 @@ const IntegratedManagementDashboard: React.FC = () => {
         }));
     };
 
-    const handleListingSelectChange = (id: keyof ListingFormData, value: string) => {
-        setListingFormData(prev => ({ ...prev, [id]: value }));
+    const handleListingSelectChange = (id: keyof PropertyListing, value: string) => {
+        setListingFormData(prev => ({ ...prev, [id]: value as any })); // Type assertion for select values
     };
+
+    const handleAddImage = useCallback(() => {
+        if (newImageUrl.trim() && !listingFormData.imageUrl.includes(newImageUrl.trim())) {
+            setListingFormData(prev => ({
+                ...prev,
+                imageUrl: [...prev.imageUrl, newImageUrl.trim()],
+            }));
+            setNewImageUrl(''); // Clear the input after adding
+        }
+    }, [newImageUrl, listingFormData.imageUrl]);
+
+    const handleRemoveImage = useCallback((indexToRemove: number) => {
+        setListingFormData(prev => ({
+            ...prev,
+            imageUrl: prev.imageUrl.filter((_, index) => index !== indexToRemove),
+        }));
+    }, []);
+
+    const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const dataUrl = reader.result as string;
+                if (!listingFormData.imageUrl.includes(dataUrl)) {
+                    setListingFormData(prev => ({
+                        ...prev,
+                        imageUrl: [...prev.imageUrl, dataUrl],
+                    }));
+                }
+            };
+            reader.readAsDataURL(file);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''; // Clear the file input
+            }
+        }
+    }, [listingFormData.imageUrl]);
+
 
     const handleListingSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (currentModalAction === 'create') {
+            const newListing: PropertyListing = {
+                ...listingFormData,
+                id: `prop-${listings.length + 1}-${Date.now()}`, // Simple unique ID generation
+                status: 'available', // New listings are available by default
+            };
+            setListings(prev => [...prev, newListing]);
+            alert('New property listing created!');
+        } else if (currentModalAction === 'edit' && selectedListing) {
+            setListings(prev => prev.map(listing =>
+                listing.id === selectedListing.id ? listingFormData : listing
+            ));
+            alert(`Property listing "${selectedListing.propertyName}" updated!`);
+        }
+
         console.log('Property Listing Data Submitted:', listingFormData);
-        alert('Property listing creation form submitted! Check console for data.');
+
         // Close modal and reset form on successful submission
         setIsListingModalOpen(false);
-        setListingFormData({
-            propertyName: '',
-            listingType: '',
-            price: null,
-            location: '',
-            bedrooms: null,
-            bathrooms: null,
-            sizeSqFt: null,
-            description: '',
-            imageUrl: '',
-        });
+        setSelectedListing(null);
+        setListingFormData(initialListingFormData);
+        setNewImageUrl(''); // Clear the new image URL input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''; // Clear the file input
+        }
     };
 
-    // --- Event Table Helper Functions ---
-    const renderStatusBadge = (status: Event['status']) => {
+    // --- Property Listing Table Helper Functions ---
+    const renderStatusBadge = (status: PropertyListing['status']) => {
         let colorClass = '';
         switch (status) {
-            case 'published':
+            case 'available':
                 colorClass = 'bg-green-100 text-green-800';
                 break;
-            case 'archived':
+            case 'pending':
                 colorClass = 'bg-yellow-100 text-yellow-800';
+                break;
+            case 'sold':
+                colorClass = 'bg-red-100 text-red-800';
+                break;
+            case 'rented':
+                colorClass = 'bg-indigo-100 text-indigo-800';
                 break;
             case 'draft':
                 colorClass = 'bg-blue-100 text-blue-800';
@@ -172,17 +300,31 @@ const IntegratedManagementDashboard: React.FC = () => {
         );
     };
 
-    const formatPrice = (price: number) => {
-        return price === 0 ? 'Free' : `₱${price.toFixed(2)}`;
-    };
+    const formatPrice = useCallback((price: number | null, listingType: 'forSale' | 'forRent' | '') => {
+        if (price === null) return 'N/A';
+        const prefix = listingType === 'forSale' ? '₱' : '₱'; // Or '₱/mo' for rent
+        return `${prefix}${price.toFixed(2)}`;
+    }, []);
 
-    // --- Event Data Filtering and Sorting Logic (Memoized for performance) ---
-    const filteredAndSortedEvents = useMemo(() => {
-        let filtered = events.filter(event =>
-            event.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            event.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            event.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            event.description.toLowerCase().includes(searchTerm.toLowerCase())
+    // --- Property Listing Data Filtering and Sorting Logic (Memoized for performance) ---
+    const filteredAndSortedListings = useMemo(() => {
+        let filtered = listings.filter(listing =>
+            (listing.propertyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                listing.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                listing.listingType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                listing.description.toLowerCase().includes(searchTerm.toLowerCase())) &&
+
+            // Filter by Listing Type
+            (filterListingType === 'all-types' || listing.listingType === filterListingType) &&
+
+            // Filter by Status
+            (filterStatus === 'all-statuses' || listing.status === filterStatus) &&
+
+            // Filter by Min Bedrooms
+            (filterMinBedrooms === '' || (listing.numBedrooms !== null && listing.numBedrooms >= filterMinBedrooms)) &&
+
+            // Filter by Min Bathrooms
+            (filterMinBathrooms === '' || (listing.numBathrooms !== null && listing.numBathrooms >= filterMinBathrooms))
         );
 
         if (sortColumn) {
@@ -194,111 +336,148 @@ const IntegratedManagementDashboard: React.FC = () => {
                     return sortDirection === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
                 }
                 if (typeof aValue === 'number' && typeof bValue === 'number') {
-                    return sortDirection === 'asc' ? aValue - bValue : bValue - aValue;
+                    return sortDirection === 'asc' ? (aValue || 0) - (bValue || 0) : (bValue || 0) - (aValue || 0);
                 }
                 return 0;
             });
         }
         return filtered;
-    }, [events, searchTerm, sortColumn, sortDirection]);
+    }, [listings, searchTerm, sortColumn, sortDirection, filterListingType, filterStatus, filterMinBedrooms, filterMinBathrooms]);
 
-    // --- Event Table Pagination Logic ---
-    const totalPages = Math.ceil(filteredAndSortedEvents.length / eventsPerPage);
-    const startIndex = (currentPage - 1) * eventsPerPage;
-    const endIndex = startIndex + eventsPerPage;
-    const currentEvents = filteredAndSortedEvents.slice(startIndex, endIndex);
+    // --- Property Listing Table Pagination Logic ---
+    const totalPages = Math.ceil(filteredAndSortedListings.length / listingsPerPage);
+    const startIndex = (currentPage - 1) * listingsPerPage;
+    const endIndex = startIndex + listingsPerPage;
+    const currentListings = filteredAndSortedListings.slice(startIndex, endIndex);
 
-    const handlePageChange = (page: number) => {
+    const handlePageChange = useCallback((page: number) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
         }
-    };
+    }, [totalPages]);
 
-    const handleSort = (column: keyof Event) => {
+    // Reset pagination when filters or search terms change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filterListingType, filterStatus, filterMinBedrooms, filterMinBathrooms]);
+
+
+    const handleSort = useCallback((column: keyof PropertyListing) => {
         if (sortColumn === column) {
             setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
         } else {
             setSortColumn(column);
             setSortDirection('asc');
         }
-    };
+    }, [sortColumn, sortDirection]);
 
-    const getSortIndicator = (column: keyof Event) => {
+    const getSortIndicator = useCallback((column: keyof PropertyListing) => {
         if (sortColumn === column) {
             return sortDirection === 'asc' ? ' ▲' : ' ▼';
         }
         return '';
-    };
+    }, [sortColumn, sortDirection]);
 
-    // --- Event Table Action Handlers (Simulated API calls) ---
-    const handleEditEvent = (eventId: string) => {
-        console.log(`[Event Action] Edit event with ID: ${eventId}`);
-        alert(`Simulating edit action for event ID: ${eventId}`);
-    };
+    // --- Property Listing Action Handlers (Local State Updates) ---
+    const handleCreateNewListing = useCallback(() => {
+        setCurrentModalAction('create');
+        setSelectedListing(null); // Ensure form is reset for new creation
+        setListingFormData(initialListingFormData); // Reset form data
+        setNewImageUrl(''); // Clear new image URL input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = ''; // Clear the file input
+        }
+        setIsListingModalOpen(true);
+    }, []);
 
-    const handleToggleStatus = (eventId: string, currentStatus: 'published' | 'archived' | 'draft') => {
-        console.log(`[Event Action] Toggle status for event ID: ${eventId}. Current status: ${currentStatus}`);
-        setEvents(prevEvents =>
-            prevEvents.map(event =>
-                event.id === eventId
-                    ? { ...event, status: currentStatus === 'published' ? 'archived' : 'published' }
-                    : event
+
+    const handleEditListing = useCallback((listingId: string) => {
+        if (!listings || listings.length === 0) return;
+        const listingToEdit = listings.find(listing => listing.id === listingId);
+        if (listingToEdit) {
+            setSelectedListing(listingToEdit);
+            setCurrentModalAction('edit');
+            setNewImageUrl(''); // Clear new image URL input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''; // Clear the file input
+            }
+            setIsListingModalOpen(true);
+        }
+    }, [listings]);
+
+    const handleToggleListingStatus = useCallback((listingId: string, currentStatus: PropertyListing['status']) => {
+        setListings(prevListings =>
+            prevListings.map(listing =>
+                listing.id === listingId
+                    ? {
+                        ...listing,
+                        status:
+                            currentStatus === 'available' ? 'pending' :
+                                currentStatus === 'pending' ? 'available' :
+                                    currentStatus === 'sold' ? 'available' : // Option to re-list
+                                        currentStatus === 'rented' ? 'available' : // Option to re-list
+                                            'available', // Default toggle for draft
+                    }
+                    : listing
             )
         );
-        alert(`Simulating status toggle for event ${eventId}. New status: ${currentStatus === 'published' ? 'Archived' : 'Published'}.`);
-    };
+        alert(`Status for listing ${listingId} updated.`);
+    }, []);
 
-    const handleViewDetails = (eventId: string) => {
-        console.log(`[Event Action] View details for event ID: ${eventId}`);
-        const eventDetails = events.find(event => event.id === eventId);
-        if (eventDetails) {
-            alert(
-                `Detailed View for "${eventDetails.name}":\n\n` +
-                `ID: ${eventDetails.id}\n` +
-                `Date: ${eventDetails.date} (${eventDetails.start_time} - ${eventDetails.end_time})\n` +
-                `Location: ${eventDetails.location}\n` +
-                `Type: ${eventDetails.type}\n` +
-                `Price: ${eventDetails.price === 0 ? 'Free' : `₱${eventDetails.price.toFixed(2)}`}\n` +
-                `Status: ${eventDetails.status.toUpperCase()}\n` +
-                `Description: ${eventDetails.description}\n` +
-                `Image URL: ${eventDetails.image || 'N/A'}`
-            );
+    const handleViewListingDetails = useCallback((listingId: string) => {
+        if (!listings || listings.length === 0) return;
+        const listingToView = listings.find(listing => listing.id === listingId);
+        if (listingToView) {
+            setSelectedListing(listingToView);
+            setCurrentModalAction('view');
+            setNewImageUrl(''); // Clear new image URL input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ''; // Clear the file input
+            }
+            setIsListingModalOpen(true);
         }
-    };
+    }, [listings]);
 
-    const handleDeleteEvent = (eventId: string) => {
-        console.log(`[Event Action] Attempting to delete event with ID: ${eventId}`);
-        if (window.confirm(`Are you sure you want to delete event "${events.find(e => e.id === eventId)?.name || eventId}"? This action cannot be undone.`)) {
-            setEvents(prevEvents => prevEvents.filter(event => event.id !== eventId));
-            alert(`Simulating deletion of event: ${eventId}. It has been removed from the list.`);
-        } else {
-            console.log(`Deletion cancelled for event: ${eventId}`);
-        }
-    };
+    const handleDeleteListing = useCallback((listingId: string) => {
+        const listingToDelete = listings.find(e => e.id === listingId);
+        setConfirmModalDetails({
+            title: 'Confirm Deletion',
+            message: `Are you sure you want to delete listing "${listingToDelete?.propertyName || listingId}"? This action cannot be undone.`,
+            onConfirm: () => {
+                setListings(prevListings => prevListings.filter(listing => listing.id !== listingId));
+                alert(`Listing "${listingId}" has been deleted.`);
+                setIsConfirmModalOpen(false);
+            },
+        });
+        setIsConfirmModalOpen(true);
+    }, [listings]);
+
 
     return (
-        <div className="min-h-screen  p-4 sm:p-6 lg:p-8 font-inter">
+        <div className="min-h-screen p-4 sm:p-6 lg:p-8 font-inter bg-gray-100">
             <div className="container mx-auto space-y-10">
-             
+                <h1 className="text-4xl font-extrabold text-gray-900 text-center mb-8">Integrated Property Listings Management</h1>
 
                 {/* Button to Open Listing Form Modal */}
                 <div className="text-end mb-8">
                     <Button
-                        onClick={() => setIsListingModalOpen(true)}
+                        onClick={handleCreateNewListing}
                         className="bg-green-600 hover:bg-green-700 text-white text-lg px-6 py-3 rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.01]"
                     >
-                        <PlusCircle size={20} className="mr-2" /> Create Listing
+                        <PlusCircle size={20} className="mr-2" /> Create New Listing
                     </Button>
                 </div>
 
-                {/* --- Property Listing Form Modal --- */}
+                {/* --- Property Listing Form/View/Edit Modal --- */}
                 {isListingModalOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-                        <Card className="w-full max-w-2xl overflow-y-auto max-h-[90vh]"> {/* Added overflow-y-auto and max-h */}
-                            <CardHeader className="p-6 border-b border-gray-200 bg-white sticky top-0 z-10"> {/* Sticky header */}
+                    <div className="fixed inset-0 z-50 flex justify-end bg-black bg-opacity-50 backdrop-blur-sm p-4 transition-all duration-300 ease-in-out">
+                        <Card className="w-full max-w-xl md:max-w-md lg:max-w-lg overflow-y-auto max-h-[calc(100vh-2rem)] rounded-lg shadow-2xl transform translate-x-0 transition-transform duration-300 ease-in-out">
+                            <CardHeader className="p-6 border-b border-gray-200 bg-white sticky top-0 z-10">
                                 <div className="flex justify-between items-center">
                                     <CardTitle className="text-3xl font-extrabold text-gray-800 flex items-center">
-                                        <PlusCircle size={28} className="mr-3 text-green-600" /> Create New Property Listing
+                                        {currentModalAction === 'create' && <><PlusCircle size={28} className="mr-3 text-green-600" /> Create New Property Listing</>}
+                                        {currentModalAction === 'edit' && <><Edit size={28} className="mr-3 text-blue-600" /> Edit Property Listing</>}
+                                        {currentModalAction === 'view' && <><Eye size={28} className="mr-3 text-gray-600" /> View Property Details</>}
                                     </CardTitle>
                                     <Button
                                         variant="ghost"
@@ -310,10 +489,46 @@ const IntegratedManagementDashboard: React.FC = () => {
                                     </Button>
                                 </div>
                                 <CardDescription className="text-gray-600 mt-2 text-base">
-                                    Fill in the details below to add a new property listing to your portfolio.
+                                    {currentModalAction === 'create' && 'Fill in the details below to add a new property listing to your portfolio.'}
+                                    {currentModalAction === 'edit' && 'Update the details for this property listing.'}
+                                    {currentModalAction === 'view' && 'Review the full details of this property listing.'}
                                 </CardDescription>
                             </CardHeader>
                             <CardContent className="p-6 bg-white">
+                                {/* Always show image gallery if images exist, regardless of modal action */}
+                                {listingFormData.imageUrl.length > 0 && (
+                                    <div className="mb-6">
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-3">Property Images</h3>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-60 overflow-y-auto p-2 border rounded-lg bg-gray-50">
+                                            {listingFormData.imageUrl.map((url, index) => (
+                                                <div key={index} className="relative group rounded-lg overflow-hidden shadow-sm border border-gray-200">
+                                                    <img
+                                                        src={url}
+                                                        alt={`Property Image ${index + 1}`}
+                                                        className="w-full h-24 object-cover"
+                                                        onError={(e) => {
+                                                            e.currentTarget.src = `https://placehold.co/150x100/cccccc/333333?text=Img+Err`;
+                                                            e.currentTarget.alt = "Image not available";
+                                                        }}
+                                                    />
+                                                    {currentModalAction === 'edit' && (
+                                                        <Button
+                                                            type="button"
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            onClick={() => handleRemoveImage(index)}
+                                                            className="absolute top-1 right-1 bg-white rounded-full p-1 text-red-600 hover:bg-red-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            title="Remove Image"
+                                                        >
+                                                            <CloseIcon size={16} />
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <p className="text-center text-sm text-gray-500 mt-2">Currently added images</p>
+                                    </div>
+                                )}
                                 <form onSubmit={handleListingSubmit} className="space-y-7">
                                     {/* Property Name */}
                                     <div>
@@ -327,7 +542,8 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             value={listingFormData.propertyName}
                                             onChange={handleListingFormChange}
                                             required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                            disabled={currentModalAction === 'view'}
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
 
@@ -337,8 +553,12 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             <label htmlFor="listingType" className="block text-sm font-semibold text-gray-800 mb-2">
                                                 Listing Type <span className="text-red-500">*</span>
                                             </label>
-                                            <Select value={listingFormData.listingType} onValueChange={(value) => handleListingSelectChange('listingType', value)}>
-                                                <SelectTrigger className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800">
+                                            <Select
+                                                value={listingFormData.listingType}
+                                                onValueChange={(value) => handleListingSelectChange('listingType', value as 'forSale' | 'forRent' | '')}
+                                                disabled={currentModalAction === 'view'}
+                                            >
+                                                <SelectTrigger className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 disabled:bg-gray-50 disabled:cursor-not-allowed">
                                                     <SelectValue placeholder="Select type" />
                                                 </SelectTrigger>
                                                 <SelectContent>
@@ -358,7 +578,8 @@ const IntegratedManagementDashboard: React.FC = () => {
                                                 value={listingFormData.price === null ? '' : listingFormData.price}
                                                 onChange={handleListingFormChange}
                                                 required
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                                disabled={currentModalAction === 'view'}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
                                     </div>
@@ -375,49 +596,53 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             value={listingFormData.location}
                                             onChange={handleListingFormChange}
                                             required
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                            disabled={currentModalAction === 'view'}
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
 
                                     {/* Bedrooms, Bathrooms, Size */}
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                         <div>
-                                            <label htmlFor="bedrooms" className="block text-sm font-semibold text-gray-800 mb-2">
+                                            <label htmlFor="numBedrooms" className="block text-sm font-semibold text-gray-800 mb-2">
                                                 Bedrooms
                                             </label>
                                             <Input
-                                                id="bedrooms"
+                                                id="numBedrooms"
                                                 type="number"
                                                 placeholder="e.g., 3"
-                                                value={listingFormData.bedrooms === null ? '' : listingFormData.bedrooms}
+                                                value={listingFormData.numBedrooms === null ? '' : listingFormData.numBedrooms}
                                                 onChange={handleListingFormChange}
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                                disabled={currentModalAction === 'view'}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor="bathrooms" className="block text-sm font-semibold text-gray-800 mb-2">
+                                            <label htmlFor="numBathrooms" className="block text-sm font-semibold text-gray-800 mb-2">
                                                 Bathrooms
                                             </label>
                                             <Input
-                                                id="bathrooms"
+                                                id="numBathrooms"
                                                 type="number"
                                                 placeholder="e.g., 2"
-                                                value={listingFormData.bathrooms === null ? '' : listingFormData.bathrooms}
+                                                value={listingFormData.numBathrooms === null ? '' : listingFormData.numBathrooms}
                                                 onChange={handleListingFormChange}
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                                disabled={currentModalAction === 'view'}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
                                         <div>
-                                            <label htmlFor="sizeSqFt" className="block text-sm font-semibold text-gray-800 mb-2">
-                                                Size (sq. ft.)
+                                            <label htmlFor="areaSqFt" className="block text-sm font-semibold text-gray-800 mb-2">
+                                                Area (sq. ft.)
                                             </label>
                                             <Input
-                                                id="sizeSqFt"
+                                                id="areaSqFt"
                                                 type="number"
                                                 placeholder="e.g., 1500"
-                                                value={listingFormData.sizeSqFt === null ? '' : listingFormData.sizeSqFt}
+                                                value={listingFormData.areaSqFt === null ? '' : listingFormData.areaSqFt}
                                                 onChange={handleListingFormChange}
-                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                                disabled={currentModalAction === 'view'}
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                             />
                                         </div>
                                     </div>
@@ -433,58 +658,218 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             value={listingFormData.description}
                                             onChange={handleListingFormChange}
                                             rows={5}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 resize-y text-gray-800 placeholder-gray-400"
+                                            disabled={currentModalAction === 'view'}
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 resize-y text-gray-800 placeholder-gray-400 disabled:bg-gray-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
 
-                                    {/* Image Upload (Placeholder) */}
+                                    {/* Image Upload/Link Section */}
+                                    {currentModalAction !== 'view' && (
+                                        <div className="space-y-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">Add Property Images</h3>
+
+                                            {/* Add from URL */}
+                                            <div className="space-y-2">
+                                                <label htmlFor="newImageUrl" className="block text-sm font-semibold text-gray-800">
+                                                    Image URL
+                                                </label>
+                                                <div className="flex space-x-2">
+                                                    <Input
+                                                        id="newImageUrl"
+                                                        type="text"
+                                                        placeholder="e.g., https://example.com/property-image.jpg"
+                                                        value={newImageUrl}
+                                                        onChange={(e) => setNewImageUrl(e.target.value)}
+                                                        className="flex-grow px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
+                                                    />
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleAddImage}
+                                                        disabled={!newImageUrl.trim()}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    >
+                                                        Add Link
+                                                    </Button>
+                                                </div>
+                                            </div>
+
+                                            {/* Or divider */}
+                                            <div className="relative flex justify-center text-xs uppercase">
+                                                <span className="bg-white px-2 text-gray-500">Or</span>
+                                                <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gray-200" />
+                                            </div>
+
+                                            {/* Upload Local File */}
+                                            <div className="space-y-2">
+                                                <label htmlFor="fileUpload" className="block text-sm font-semibold text-gray-800">
+                                                    Upload Local Image
+                                                </label>
+                                                <div className="flex items-center space-x-2">
+                                                    <Input
+                                                        id="fileUpload"
+                                                        type="file"
+                                                        accept="image/*"
+                                                        onChange={handleFileChange}
+                                                        ref={fileInputRef}
+                                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    />
+                                                </div>
+                                                <p className="text-xs text-gray-500 mt-2">Select an image file from your computer (.jpg, .png, etc.).</p>
+                                            </div>
+
+                                            {/* Current Images Display (for create/edit) */}
+                                            {listingFormData.imageUrl.length > 0 && (
+                                                <div className="mt-4 border rounded-lg p-3 bg-gray-50 max-h-40 overflow-y-auto">
+                                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Current Images:</h4>
+                                                    <ul className="space-y-1">
+                                                        {listingFormData.imageUrl.map((url, index) => (
+                                                            <li key={index} className="flex items-center justify-between text-xs text-gray-700 bg-white p-2 rounded-md shadow-sm">
+                                                                <span className="truncate flex-grow mr-2">{url.length > 50 ? url.substring(0, 47) + '...' : url}</span>
+                                                                <Button
+                                                                    type="button"
+                                                                    variant="ghost"
+                                                                    size="icon"
+                                                                    onClick={() => handleRemoveImage(index)}
+                                                                    className="h-6 w-6 p-0 text-red-500 hover:bg-red-50"
+                                                                    title="Remove image"
+                                                                >
+                                                                    <CloseIcon size={14} />
+                                                                </Button>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                            <p className="text-xs text-gray-500 mt-2">Images added from URLs or local files will appear in the preview above.</p>
+                                        </div>
+                                    )}
+
+                                    {/* Status (Always rendered, but disabled in view mode) */}
                                     <div>
-                                        <label htmlFor="imageUrl" className="block text-sm font-semibold text-gray-800 mb-2">
-                                            Property Image (URL)
+                                        <label htmlFor="status" className="block text-sm font-semibold text-gray-800 mb-2">
+                                            Status <span className="text-red-500">*</span>
                                         </label>
-                                        <Input
-                                            id="imageUrl"
-                                            type="text"
-                                            placeholder="e.g., https://example.com/property-image.jpg"
-                                            value={listingFormData.imageUrl}
-                                            onChange={handleListingFormChange}
-                                            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 placeholder-gray-400"
-                                        />
-                                        <p className="text-xs text-gray-500 mt-2">For demonstration, use an image URL. In a real app, this would be a file upload.</p>
+                                        <Select
+                                            value={listingFormData.status}
+                                            onValueChange={(value) => handleListingSelectChange('status', value as PropertyListing['status'])}
+                                            disabled={currentModalAction === 'view'}
+                                        >
+                                            <SelectTrigger className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 text-gray-800 disabled:bg-gray-50 disabled:cursor-not-allowed">
+                                                <SelectValue placeholder="Select status" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="available">Available</SelectItem>
+                                                <SelectItem value="pending">Pending</SelectItem>
+                                                <SelectItem value="sold">Sold</SelectItem>
+                                                <SelectItem value="rented">Rented</SelectItem>
+                                                <SelectItem value="draft">Draft</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                     </div>
 
-                                    {/* Submit Button */}
-                                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 py-3.5 text-xl font-bold rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
-                                        Create Listing
-                                    </Button>
+
+                                    {/* Action Buttons (Submit for create/edit, Close for view) */}
+                                    {currentModalAction !== 'view' ? (
+                                        <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 py-3.5 text-xl font-bold rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                                            {currentModalAction === 'create' ? 'Create Listing' : 'Save Changes'}
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            type="button"
+                                            onClick={() => {
+                                                setIsListingModalOpen(false);
+                                                setSelectedListing(null);
+                                            }}
+                                            className="w-full bg-gray-600 hover:bg-gray-700 py-3.5 text-xl font-bold rounded-lg shadow-md transition-all duration-300 transform hover:scale-[1.01] focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                        >
+                                            Close
+                                        </Button>
+                                    )}
                                 </form>
                             </CardContent>
                         </Card>
                     </div>
                 )}
 
-                {/* --- Event Management Table Section --- */}
+                {/* --- Property Listings Management Table Section --- */}
                 <div className="bg-white shadow-xl rounded-lg p-6 md:p-8 mt-10">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Property Management</h2>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-6 text-center">Property Listings Management</h2>
 
-                    {/* Search Bar */}
-                    <div className="mb-6">
+                    {/* Search Bar and Filtration Bar */}
+                    <div className="mb-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                         <Input
                             type="text"
-                            placeholder="Search events (name, location, type, description)..."
+                            placeholder="Search listings (name, location, description)..."
                             value={searchTerm}
                             onChange={(e) => {
                                 setSearchTerm(e.target.value);
-                                setCurrentPage(1);
                             }}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            className="col-span-full md:col-span-2 lg:col-span-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200"
                         />
+                        {/* Listing Type Filter */}
+                        <div>
+                            <Select
+                                value={filterListingType}
+                                onValueChange={(value: 'forSale' | 'forRent' | 'all-types') => setFilterListingType(value)}
+                            >
+                                <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                    <SelectValue placeholder="Filter by Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all-types">All Types</SelectItem>
+                                    <SelectItem value="forSale">For Sale</SelectItem>
+                                    <SelectItem value="forRent">For Rent</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div>
+                            <Select
+                                value={filterStatus}
+                                onValueChange={(value: PropertyListing['status'] | 'all-statuses') => setFilterStatus(value)}
+                            >
+                                <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200">
+                                    <SelectValue placeholder="Filter by Status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all-statuses">All Statuses</SelectItem>
+                                    <SelectItem value="available">Available</SelectItem>
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="sold">Sold</SelectItem>
+                                    <SelectItem value="rented">Rented</SelectItem>
+                                    <SelectItem value="draft">Draft</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        {/* Min Bedrooms Filter */}
+                        <div>
+                            <Input
+                                type="number"
+                                placeholder="Min Beds"
+                                value={filterMinBedrooms === '' ? '' : filterMinBedrooms}
+                                onChange={(e) => setFilterMinBedrooms(e.target.value === '' ? '' : parseInt(e.target.value))}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            />
+                        </div>
+
+                        {/* Min Bathrooms Filter */}
+                        <div>
+                            <Input
+                                type="number"
+                                placeholder="Min Baths"
+                                value={filterMinBathrooms === '' ? '' : filterMinBathrooms}
+                                onChange={(e) => setFilterMinBathrooms(e.target.value === '' ? '' : parseInt(e.target.value))}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+                            />
+                        </div>
                     </div>
 
-                    {filteredAndSortedEvents.length === 0 ? (
+                    {filteredAndSortedListings.length === 0 ? (
                         <div className="text-center py-10 text-gray-500">
-                            <p className="text-lg mb-2">No events found matching your criteria.</p>
-                            <p>Try adjusting your search or creating a new event!</p>
+                            <p className="text-lg mb-2">No property listings found matching your criteria.</p>
+                            <p>Try adjusting your search or creating a new listing!</p>
                         </div>
                     ) : (
                         <>
@@ -496,16 +881,9 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             <th
                                                 scope="col"
                                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                                onClick={() => handleSort('name')}
+                                                onClick={() => handleSort('propertyName')}
                                             >
-                                                Event Name {getSortIndicator('name')}
-                                            </th>
-                                            <th
-                                                scope="col"
-                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                                onClick={() => handleSort('date')}
-                                            >
-                                                Date & Time {getSortIndicator('date')}
+                                                Property Name {getSortIndicator('propertyName')}
                                             </th>
                                             <th
                                                 scope="col"
@@ -517,9 +895,15 @@ const IntegratedManagementDashboard: React.FC = () => {
                                             <th
                                                 scope="col"
                                                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                                                onClick={() => handleSort('type')}
+                                                onClick={() => handleSort('listingType')}
                                             >
-                                                Type {getSortIndicator('type')}
+                                                Type {getSortIndicator('listingType')}
+                                            </th>
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                            >
+                                                Beds/Baths/Area
                                             </th>
                                             <th
                                                 scope="col"
@@ -541,77 +925,60 @@ const IntegratedManagementDashboard: React.FC = () => {
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {currentEvents.map((event) => (
-                                            <tr key={event.id} className="hover:bg-gray-50 transition-colors duration-150">
+                                        {currentListings.map((listing) => (
+                                            <tr key={listing.id} className="hover:bg-gray-50 transition-colors duration-150">
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm font-medium text-gray-900">{event.name}</div>
-                                                    <div className="text-xs text-gray-500 max-w-xs truncate">{event.description}</div>
+                                                    <div className="text-sm font-medium text-gray-900">{listing.propertyName}</div>
+                                                    <div className="text-xs text-gray-500 max-w-xs truncate">{listing.description}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{event.date}</div>
-                                                    <div className="text-xs text-gray-500">{event.start_time} - {event.end_time}</div>
+                                                    <div className="text-sm text-gray-900">{listing.location}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{event.location}</div>
+                                                    <div className="text-sm text-gray-900 capitalize">
+                                                        {listing.listingType === 'forSale' ? 'For Sale' : 'For Rent'}
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900 capitalize">{event.type}</div>
+                                                    <div className="text-sm text-gray-900">
+                                                        {listing.numBedrooms || 'N/A'} <Bed className="inline-block h-4 w-4 mr-1 text-gray-500" /> / {listing.numBathrooms || 'N/A'} <Bath className="inline-block h-4 w-4 mr-1 text-gray-500" />
+                                                    </div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {listing.areaSqFt ? `${listing.areaSqFt} sq. ft.` : 'N/A'} <Maximize className="inline-block h-3 w-3 mr-1 text-gray-400" />
+                                                    </div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    <div className="text-sm text-gray-900">{formatPrice(event.price)}</div>
+                                                    <div className="text-sm text-gray-900">{formatPrice(listing.price, listing.listingType)}</div>
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {renderStatusBadge(event.status)}
+                                                    {renderStatusBadge(listing.status)}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                                    <div className="flex items-center space-x-2">
-                                                        <button
-                                                            onClick={() => handleViewDetails(event.id)}
-                                                            className="text-blue-600 hover:text-blue-900 p-1 rounded-md hover:bg-blue-50 transition-colors"
-                                                            title="View Details"
-                                                        >
-                                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                            </svg>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleEditEvent(event.id)}
-                                                            className="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50 transition-colors"
-                                                            title="Edit Event"
-                                                        >
-                                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                            </svg>
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleToggleStatus(event.id, event.status)}
-                                                            className={`p-1 rounded-md hover:opacity-80 transition-colors ${event.status === 'published'
-                                                                    ? 'text-yellow-600 hover:bg-yellow-50'
-                                                                    : 'text-green-600 hover:bg-green-50'
-                                                                }`}
-                                                            title={event.status === 'published' ? 'Archive Event' : 'Publish Event'}
-                                                        >
-                                                            {event.status === 'published' ? (
-                                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                                                                </svg>
-                                                            ) : (
-                                                                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                                </svg>
-                                                            )}
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDeleteEvent(event.id)}
-                                                            className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50 transition-colors"
-                                                            title="Delete Event"
-                                                        >
-                                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                                    {/* Dropdown Menu for Actions */}
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                                                <span className="sr-only">Open menu</span>
+                                                                <MoreHorizontal className="h-4 w-4" />
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                                            <DropdownMenuItem onClick={() => handleEditListing(listing.id)} className="cursor-pointer">
+                                                                <Edit className="mr-2 h-4 w-4" /> Edit Listing
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleViewListingDetails(listing.id)} className="cursor-pointer">
+                                                                <Eye className="mr-2 h-4 w-4" /> View Details
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuSeparator />
+                                                            <DropdownMenuItem onClick={() => handleToggleListingStatus(listing.id, listing.status)} className="cursor-pointer">
+                                                                <Repeat className="mr-2 h-4 w-4" /> Toggle Status
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem onClick={() => handleDeleteListing(listing.id)} className="text-red-600 focus:text-red-700 cursor-pointer">
+                                                                <Trash2 className="mr-2 h-4 w-4" /> Delete Listing
+                                                            </DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
                                                 </td>
                                             </tr>
                                         ))}
@@ -622,7 +989,7 @@ const IntegratedManagementDashboard: React.FC = () => {
                             {/* Pagination Controls */}
                             <div className="flex justify-between items-center mt-6">
                                 <span className="text-sm text-gray-700">
-                                    Showing {Math.min(startIndex + 1, filteredAndSortedEvents.length)} to {Math.min(endIndex, filteredAndSortedEvents.length)} of {filteredAndSortedEvents.length} events
+                                    Showing {Math.min(startIndex + 1, filteredAndSortedListings.length)} to {Math.min(endIndex, filteredAndSortedListings.length)} of {filteredAndSortedListings.length} listings
                                 </span>
                                 <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                                     <Button
@@ -630,21 +997,15 @@ const IntegratedManagementDashboard: React.FC = () => {
                                         disabled={currentPage === 1}
                                         className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <span className="sr-only">Previous</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
+                                        Previous
                                     </Button>
-                                    {[...Array(totalPages)].map((_, index) => (
+                                    {[...Array(totalPages)].map((_, i) => (
                                         <Button
-                                            key={index}
-                                            onClick={() => handlePageChange(index + 1)}
-                                            className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${currentPage === index + 1
-                                                    ? 'z-10 bg-blue-50 border-blue-500 text-blue-600'
-                                                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'
-                                                }`}
+                                            key={i + 1}
+                                            onClick={() => handlePageChange(i + 1)}
+                                            className={`relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium ${currentPage === i + 1 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                                         >
-                                            {index + 1}
+                                            {i + 1}
                                         </Button>
                                     ))}
                                     <Button
@@ -652,10 +1013,7 @@ const IntegratedManagementDashboard: React.FC = () => {
                                         disabled={currentPage === totalPages}
                                         className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <span className="sr-only">Next</span>
-                                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                            <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                        </svg>
+                                        Next
                                     </Button>
                                 </nav>
                             </div>
@@ -663,6 +1021,15 @@ const IntegratedManagementDashboard: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Global Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                title={confirmModalDetails.title}
+                message={confirmModalDetails.message}
+                onConfirm={confirmModalDetails.onConfirm}
+                onCancel={() => setIsConfirmModalOpen(false)}
+            />
         </div>
     );
 };

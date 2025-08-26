@@ -24,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::middleware('role', RoleMiddleware::class);
+
     }
     public function share(Request $request): array
     {

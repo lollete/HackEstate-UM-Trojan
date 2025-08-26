@@ -1,16 +1,15 @@
 // src/components/property/PropertyCard.tsx
 import React from 'react';
 import { Ruler, BedDouble, Bath } from 'lucide-react';
-import { Property } from '@/types'; // Import the Property interface
+import { Property } from '@/types'; 
 
-// Define props interface for PropertyCard
 interface PropertyCardProps {
     property: Property;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
     const {
-        id, // for dev only, not displayed directly on card
+        id,
         name,
         location,
         size,
@@ -25,6 +24,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
 
     return (
         <div className="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+        
             <img src={image} alt={name} className="w-full h-60 object-cover" />
             <input type="hidden" value={id} />
             <div className="p-3 flex-grow">

@@ -66,6 +66,7 @@ export interface Property {
     image: string; // URL to the property image
     forSale: boolean;
     forRent: boolean;
+    status: 'available' | 'sold' | 'rented';
     details?: {
         bedroomsAndBathrooms?: {
             bedrooms: number;
